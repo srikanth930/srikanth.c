@@ -1,0 +1,485 @@
+{% extends "base.html" %}
+
+{% block title %}Analysis Results — {{ profile.contact.name }} | {{ app_title }}{% endblock %}
+
+{% block content %}
+<div class="results-page container">
+
+    <!-- Top Candidate Header Card -->
+    <div class="candidate-header-card glass-panel">
+        <div class="candidate-meta">
+            <div class="candidate-avatar">
+                <i data-lucide="user-check"></i>
+            </div>
+            <div class="candidate-info">
+                <div class="candidate-title-row">
+                    <h1 class="candidate-name">{{ profile.contact.name }}</h1>
+                    <span class="file-tag"><i data-lucide="file-text"></i> {{ filename }} ({{ doc_data.file_type }})</span>
+                </div>
+                <div class="candidate-links">
+                    {% if profile.contact.email %}
+                    <span class="meta-item"><i data-lucide="mail"></i> {{ profile.contact.email }}</span>
+                    {% endif %}
+                    {% if profile.contact.phone %}
+                    <span class="meta-item"><i data-lucide="phone"></i> {{ profile.contact.phone }}</span>
+                    {% endif %}
+                    {% if profile.contact.linkedin %}
+                    <a href="https://{{ profile.contact.linkedin }}" target="_blank" class="meta-item meta-link"><i data-lucide="linkedin"></i> {{ profile.contact.linkedin }}</a>
+                    {% endif %}
+                    {% if profile.contact.github %}
+                    <a href="https://{{ profile.contact.github }}" target="_blank" class="meta-item meta-link"><i data-lucide="github"></i> {{ profile.contact.github }}</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="header-actions">
+            <a href="/" class="btn-secondary"><i data-lucide="arrow-left"></i> Analyze Another</a>
+            <button type="button" class="btn-secondary" id="btnPrintReport"><i data-lucide="printer"></i> Print / Save PDF</button>
+        </div>
+    </div>
+
+    <!-- Analytics Dashboard Grid -->
+    <div class="dashboard-grid">
+        
+        <!-- Left: ATS Overall Score & Pillars -->
+        <div class="ats-overview-card glass-panel">
+            <div class="card-header">
+                <div class="card-header-title">
+                    <i data-lucide="shield-check" class="text-accent"></i>
+                    <h3>Overall ATS Readiness Score</h3>
+                </div>
+                <span class="badge-status badge-{{ ats_score.rating_color }}">{{ ats_score.rating_badge }}</span>
+            </div>
+
+            <div class="score-display-wrapper">
+                <div class="score-gauge-container">
+                    <canvas id="atsScoreGauge" width="180" height="180" data-score="{{ ats_score.overall_score }}"></canvas>
+                    <div class="gauge-center-text">
+                        <span class="gauge-number">{{ ats_score.overall_score }}</span>
+                        <span class="gauge-max">/ 100</span>
+                    </div>
+                </div>
+
+                <div class="score-summary-text">
+                    <p class="score-lead">
+                        {% if ats_score.overall_score >= 80 %}
+                        Your resume is highly optimized for modern Applicant Tracking Systems (ATS).
+                        {% elif ats_score.overall_score >= 60 %}
+                        Your resume has strong fundamentals with opportunities to increase quantifiable impact.
+                        {% else %}
+                        Your resume requires formatting and keyword optimization to safely pass ATS automated screens.
+                        {% endif %}
+                    </p>
+                    <div class="doc-quick-stats">
+                        <div class="quick-stat-item">
+                            <span class="stat-value">{{ doc_data.word_count }}</span>
+                            <span class="stat-label">Words</span>
+                        </div>
+                        <div class="quick-stat-item">
+                            <span class="stat-value">{{ profile.skills.total_skills_count }}</span>
+                            <span class="stat-label">Skills Found</span>
+                        </div>
+                        <div class="quick-stat-item">
+                            <span class="stat-value">{{ profile.metrics.quantified_count }}</span>
+                            <span class="stat-label">Metric Bullets</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sub-Score Pillars -->
+            <div class="subscores-section">
+                <h4 class="subscore-heading">5-Pillar Score Breakdown</h4>
+                <div class="pillar-bars">
+                    {% for key, pillar in ats_score.breakdown.items() %}
+                    <div class="pillar-item">
+                        <div class="pillar-info">
+                            <span class="pillar-label">{{ pillar.label }}</span>
+                            <span class="pillar-val">{{ pillar.score }} / {{ pillar.max }}</span>
+                        </div>
+                        <div class="progress-bar-bg">
+                            <div class="progress-bar-fill {% if pillar.percentage >= 80 %}fill-emerald{% elif pillar.percentage >= 50 %}fill-teal{% else %}fill-rose{% endif %}" style="width: {{ pillar.percentage }}%;"></div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Job Description Matcher (or Skills Radar) -->
+        <div class="jd-match-card glass-panel">
+            {% if jd_match.has_jd %}
+            <div class="card-header">
+                <div class="card-header-title">
+                    <i data-lucide="target" class="text-accent"></i>
+                    <h3>Target Job Description Match</h3>
+                </div>
+                <span class="badge-status badge-{{ jd_match.fit_color }}">{{ jd_match.fit_level }}</span>
+            </div>
+
+            <div class="jd-match-content">
+                <div class="match-score-row">
+                    <div class="match-score-pill">
+                        <span class="match-score-number">{{ jd_match.match_percentage }}%</span>
+                        <span class="match-score-label">Role Fit Match</span>
+                    </div>
+                    <p class="match-desc">{{ jd_match.fit_message }}</p>
+                </div>
+
+                <!-- Missing Hard Skills -->
+                {% if jd_match.missing_skills %}
+                <div class="skills-gap-box">
+                    <h4 class="gap-title text-rose"><i data-lucide="alert-circle"></i> Priority Missing Keywords (Add to Resume)</h4>
+                    <div class="tags-cloud">
+                        {% for skill in jd_match.missing_skills %}
+                        <span class="tag-pill tag-missing">{{ skill }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Matched Skills -->
+                {% if jd_match.matched_skills %}
+                <div class="skills-matched-box">
+                    <h4 class="gap-title text-emerald"><i data-lucide="check-circle-2"></i> Matched Skills Found</h4>
+                    <div class="tags-cloud">
+                        {% for skill in jd_match.matched_skills %}
+                        <span class="tag-pill tag-matched">{{ skill }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            {% else %}
+            <!-- Skills Radar & Taxonomy Chart -->
+            <div class="card-header">
+                <div class="card-header-title">
+                    <i data-lucide="radar" class="text-accent"></i>
+                    <h3>Skills Distribution Profile</h3>
+                </div>
+                <span class="badge-status badge-teal">{{ profile.skills.total_skills_count }} Identified</span>
+            </div>
+            <div class="radar-chart-container">
+                <canvas id="skillsRadarChart" 
+                    data-languages="{{ profile.skills.categorized.get('Programming Languages', []) | length }}"
+                    data-frameworks="{{ profile.skills.categorized.get('Frameworks & Libraries', []) | length }}"
+                    data-cloud="{{ profile.skills.categorized.get('Cloud, DevOps & Infrastructure', []) | length }}"
+                    data-databases="{{ profile.skills.categorized.get('Databases & Storage', []) | length }}"
+                    data-ai="{{ profile.skills.categorized.get('AI, ML & Data Engineering', []) | length }}"
+                    data-soft="{{ profile.skills.soft_skills_count }}"
+                ></canvas>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Skills Breakdown Section -->
+    <div class="skills-taxonomy-section glass-panel">
+        <div class="card-header">
+            <div class="card-header-title">
+                <i data-lucide="cpu" class="text-accent"></i>
+                <h3>Detected Skills by Domain</h3>
+            </div>
+        </div>
+        <div class="taxonomy-grid">
+            {% for category, skills in profile.skills.categorized.items() %}
+            <div class="taxonomy-category-card">
+                <h5 class="category-title">{{ category }} ({{ skills | length }})</h5>
+                <div class="tags-cloud">
+                    {% for s in skills %}
+                    <span class="tag-pill tag-neutral">{{ s }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Strengths & Suggestions Grid -->
+    <div class="insights-grid">
+        <!-- Strengths Card -->
+        <div class="insights-card glass-panel">
+            <div class="card-header">
+                <div class="card-header-title">
+                    <i data-lucide="check-check" class="text-emerald"></i>
+                    <h3>Resume Strengths</h3>
+                </div>
+            </div>
+            <ul class="insights-list">
+                {% for st in ats_score.strengths %}
+                <li class="insight-item insight-strength">
+                    <i data-lucide="check-circle" class="icon-strength"></i>
+                    <span>{{ st }}</span>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <!-- Actionable Suggestions Card -->
+        <div class="insights-card glass-panel">
+            <div class="card-header">
+                <div class="card-header-title">
+                    <i data-lucide="sparkles" class="text-amber"></i>
+                    <h3>Recommended Improvements</h3>
+                </div>
+            </div>
+            <ul class="insights-list">
+                {% for sg in ats_score.suggestions %}
+                <li class="insight-item insight-suggestion">
+                    <div class="suggestion-header">
+                        <span class="badge-severity badge-severity-{{ sg.type }}">{{ sg.type | upper }}</span>
+                        <strong class="suggestion-category">{{ sg.category }}</strong>
+                    </div>
+                    <p class="suggestion-text">{{ sg.text }}</p>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <!-- AI Job Assistant Suite (Tabbed Interface) -->
+    <div class="ai-assistant-suite glass-panel" id="assistantSuite">
+        <div class="suite-header">
+            <div class="suite-title-group">
+                <div class="suite-icon-badge">
+                    <i data-lucide="bot"></i>
+                </div>
+                <div>
+                    <h2 class="suite-title">AI Job Assistant Suite</h2>
+                    <p class="suite-subtitle">Customized career acceleration tools tailored specifically to this resume.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs Navigation -->
+        <div class="tabs-nav">
+            <button type="button" class="tab-btn active" data-tab="tab-cover-letter">
+                <i data-lucide="file-text"></i> Tailored Cover Letter
+            </button>
+            <button type="button" class="tab-btn" data-tab="tab-interview-prep">
+                <i data-lucide="help-circle"></i> STAR Interview Prep
+            </button>
+            <button type="button" class="tab-btn" data-tab="tab-cold-outreach">
+                <i data-lucide="send"></i> Cold Outreach Drafter
+            </button>
+            <button type="button" class="tab-btn" data-tab="tab-bullet-rewrites">
+                <i data-lucide="edit-3"></i> Bullet Optimizer
+            </button>
+            <button type="button" class="tab-btn" data-tab="tab-career-roadmap">
+                <i data-lucide="map"></i> 3-Phase Skill Roadmap
+            </button>
+        </div>
+
+        <!-- Tab 1: Cover Letter -->
+        <div class="tab-content active" id="tab-cover-letter">
+            <div class="tab-pane-header">
+                <div>
+                    <h3 class="pane-title">Tailored Cover Letter</h3>
+                    <p class="pane-desc">Personalized cover letter highlighting candidate's verified achievements and alignment.</p>
+                </div>
+                <div class="pane-actions">
+                    <button type="button" class="btn-secondary" id="btnCopyCoverLetter">
+                        <i data-lucide="copy"></i> Copy to Clipboard
+                    </button>
+                    <button type="button" class="btn-secondary" id="btnDownloadCoverLetter">
+                        <i data-lucide="download"></i> Download .txt
+                    </button>
+                </div>
+            </div>
+            <div class="document-preview-box">
+                <textarea class="preview-textarea" id="coverLetterText" rows="18">{{ cover_letter }}</textarea>
+            </div>
+        </div>
+
+        <!-- Tab 2: Interview Prep -->
+        <div class="tab-content" id="tab-interview-prep">
+            <div class="tab-pane-header">
+                <div>
+                    <h3 class="pane-title">STAR Method Interview Guide</h3>
+                    <p class="pane-desc">Role-specific behavioral & technical questions with structured Situation-Task-Action-Result model answers.</p>
+                </div>
+            </div>
+
+            <div class="questions-accordion">
+                {% for q in interview_questions %}
+                <div class="accordion-item glass-panel">
+                    <div class="accordion-header">
+                        <div class="accordion-title-group">
+                            <span class="badge-category">{{ q.category }}</span>
+                            <h4 class="question-text">{{ q.question }}</h4>
+                        </div>
+                        <i data-lucide="chevron-down" class="accordion-icon"></i>
+                    </div>
+                    <div class="accordion-body">
+                        <div class="interviewer-tip">
+                            <strong><i data-lucide="eye"></i> What the Interviewer Looks For:</strong>
+                            <p>{{ q.what_interviewer_looks_for }}</p>
+                        </div>
+
+                        <div class="star-framework-card">
+                            <div class="star-framework-title"><i data-lucide="award"></i> Recommended STAR Model Answer:</div>
+                            <div class="star-grid">
+                                <div class="star-pill">
+                                    <span class="star-letter">S</span>
+                                    <div class="star-desc"><strong>Situation:</strong> {{ q.star_sample_answer.Situation }}</div>
+                                </div>
+                                <div class="star-pill">
+                                    <span class="star-letter">T</span>
+                                    <div class="star-desc"><strong>Task:</strong> {{ q.star_sample_answer.Task }}</div>
+                                </div>
+                                <div class="star-pill">
+                                    <span class="star-letter">A</span>
+                                    <div class="star-desc"><strong>Action:</strong> {{ q.star_sample_answer.Action }}</div>
+                                </div>
+                                <div class="star-pill">
+                                    <span class="star-letter">R</span>
+                                    <div class="star-desc"><strong>Result:</strong> {{ q.star_sample_answer.Result }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Tab 3: Cold Outreach Drafter -->
+        <div class="tab-content" id="tab-cold-outreach">
+            <div class="tab-pane-header">
+                <div>
+                    <h3 class="pane-title">Recruiter & Hiring Manager Outreach</h3>
+                    <p class="pane-desc">High-conversion networking templates customized to your experience profile.</p>
+                </div>
+            </div>
+
+            <div class="outreach-cards-grid">
+                <!-- LinkedIn Connection Note -->
+                <div class="outreach-card glass-panel">
+                    <div class="outreach-card-header">
+                        <div class="outreach-type">
+                            <i data-lucide="linkedin" class="text-accent"></i>
+                            <h4>LinkedIn Connection Request</h4>
+                        </div>
+                        <button type="button" class="btn-icon-copy" data-copy-target="linkedinNote" title="Copy text">
+                            <i data-lucide="copy"></i>
+                        </button>
+                    </div>
+                    <p class="outreach-note-hint">Under 300 characters — optimized for connection acceptance rate.</p>
+                    <textarea class="outreach-textarea" id="linkedinNote" rows="5" readonly>{{ cold_outreach.linkedin_connection_note }}</textarea>
+                </div>
+
+                <!-- Recruiter InMail -->
+                <div class="outreach-card glass-panel">
+                    <div class="outreach-card-header">
+                        <div class="outreach-type">
+                            <i data-lucide="message-square" class="text-accent"></i>
+                            <h4>Recruiter InMail / Direct Message</h4>
+                        </div>
+                        <button type="button" class="btn-icon-copy" data-copy-target="recruiterInMail" title="Copy text">
+                            <i data-lucide="copy"></i>
+                        </button>
+                    </div>
+                    <p class="outreach-note-hint">For messaging technical sourcers and internal talent acquisition.</p>
+                    <textarea class="outreach-textarea" id="recruiterInMail" rows="12" readonly>{{ cold_outreach.recruiter_inmail }}</textarea>
+                </div>
+
+                <!-- Cold Email to Hiring Manager -->
+                <div class="outreach-card glass-panel">
+                    <div class="outreach-card-header">
+                        <div class="outreach-type">
+                            <i data-lucide="mail" class="text-accent"></i>
+                            <h4>Cold Email to Engineering Lead / Hiring Manager</h4>
+                        </div>
+                        <button type="button" class="btn-icon-copy" data-copy-target="coldEmailManager" title="Copy text">
+                            <i data-lucide="copy"></i>
+                        </button>
+                    </div>
+                    <p class="outreach-note-hint">Direct email highlighting specific ROI, metrics, and technical expertise.</p>
+                    <textarea class="outreach-textarea" id="coldEmailManager" rows="14" readonly>{{ cold_outreach.cold_email_to_manager }}</textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 4: Bullet Point Optimizer -->
+        <div class="tab-content" id="tab-bullet-rewrites">
+            <div class="tab-pane-header">
+                <div>
+                    <h3 class="pane-title">Bullet Point Re-writer & Metric Enhancer</h3>
+                    <p class="pane-desc">Transforms generic task descriptions into quantified, high-impact accomplishment bullets.</p>
+                </div>
+            </div>
+
+            <div class="bullet-rewrites-list">
+                {% for b in bullet_enhancements %}
+                <div class="bullet-compare-card glass-panel">
+                    <div class="bullet-column bullet-original">
+                        <span class="bullet-tag tag-before"><i data-lucide="x"></i> Original Bullet</span>
+                        <p class="bullet-text">{{ b.original }}</p>
+                        <span class="bullet-diagnosis">{{ b.diagnosis }}</span>
+                    </div>
+                    <div class="bullet-arrow-divider">
+                        <i data-lucide="arrow-right"></i>
+                    </div>
+                    <div class="bullet-column bullet-improved">
+                        <div class="improved-header">
+                            <span class="bullet-tag tag-after"><i data-lucide="sparkles"></i> AI Enhanced (STAR Formula)</span>
+                            <button type="button" class="btn-copy-sm" data-copy-text="{{ b.improved }}">
+                                <i data-lucide="copy"></i> Copy
+                            </button>
+                        </div>
+                        <p class="bullet-text-improved">{{ b.improved }}</p>
+                        <span class="formula-tip">{{ b.formula_tip }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Tab 5: Career Upskilling Roadmap -->
+        <div class="tab-content" id="tab-career-roadmap">
+            <div class="tab-pane-header">
+                <div>
+                    <h3 class="pane-title">3-Phase Skill Gap Upskilling Roadmap</h3>
+                    <p class="pane-desc">Structured learning path to bridge keyword gaps and boost competitiveness for target roles.</p>
+                </div>
+            </div>
+
+            <div class="roadmap-timeline">
+                {% for phase in career_roadmap %}
+                <div class="roadmap-phase-card glass-panel">
+                    <div class="phase-header">
+                        <div class="phase-badge badge-{{ phase.color }}">{{ phase.priority }}</div>
+                        <h4 class="phase-title">{{ phase.phase }}</h4>
+                    </div>
+                    
+                    <div class="phase-skills-row">
+                        <strong>Target Competencies:</strong>
+                        <div class="tags-cloud">
+                            {% for sk in phase.skills_to_master %}
+                            <span class="tag-pill tag-matched">{{ sk }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="phase-actions-list">
+                        <strong>Actionable Milestones:</strong>
+                        <ul>
+                            {% for act in phase.recommended_actions %}
+                            <li><i data-lucide="check" class="action-check"></i> {{ act }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/charts.js"></script>
+{% endblock %}

@@ -1,0 +1,206 @@
+{% extends "base.html" %}
+
+{% block title %}{{ app_title }} — Elevate Your Resume & Land Interviews{% endblock %}
+
+{% block content %}
+<section class="hero-section">
+    <div class="container hero-container">
+        <div class="hero-badge">
+            <span class="badge-pulse"></span>
+            <span>Next-Generation ATS Engine & AI Job Copilot</span>
+        </div>
+        <h1 class="hero-title">
+            Analyze Your Resume.<br>
+            <span class="gradient-text">Beat the ATS & Accelerate Your Career.</span>
+        </h1>
+        <p class="hero-subtitle">
+            Get instant multi-pillar ATS scoring, quantifiable impact diagnostics, keyword gap analysis against any job description, and automated interview prep.
+        </p>
+
+        <!-- Main Upload & Input Card -->
+        <div class="analyzer-card glass-panel" id="upload-card">
+            <form action="/analyze-form" method="POST" enctype="multipart/form-data" id="resumeForm">
+                
+                <div class="grid-2-cols">
+                    <!-- Left: Resume Upload Area -->
+                    <div class="input-column">
+                        <label class="input-label">
+                            <i data-lucide="upload-cloud"></i>
+                            <span>Upload Resume (PDF, DOCX, TXT)</span>
+                        </label>
+                        
+                        <div class="drop-zone" id="dropZone">
+                            <input type="file" id="resumeFileInput" name="resume_file" accept=".pdf,.docx,.doc,.txt,.md" class="file-input-hidden">
+                            <div class="drop-zone-content" id="dropZonePrompt">
+                                <div class="drop-icon-wrapper">
+                                    <i data-lucide="file-up"></i>
+                                </div>
+                                <p class="drop-title">Drag & drop your resume file here</p>
+                                <p class="drop-subtitle">or <span class="text-accent">browse from your computer</span></p>
+                                <span class="drop-formats">Supports PDF, DOCX, DOC, TXT (Max 10MB)</span>
+                            </div>
+
+                            <div class="file-preview-card hidden" id="filePreview">
+                                <div class="file-preview-icon">
+                                    <i data-lucide="file-check-2"></i>
+                                </div>
+                                <div class="file-preview-info">
+                                    <span class="file-name" id="fileNameDisplay">resume.pdf</span>
+                                    <span class="file-size" id="fileSizeDisplay">124 KB</span>
+                                </div>
+                                <button type="button" class="btn-remove-file" id="btnRemoveFile" title="Remove file">
+                                    <i data-lucide="x"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Sample Resumes 1-Click Bar -->
+                        <div class="sample-resumes-container" id="samples">
+                            <span class="sample-label"><i data-lucide="sparkles"></i> Or test instantly with a sample:</span>
+                            <div class="sample-buttons">
+                                <button type="button" class="btn-sample" data-sample="senior-software-engineer">
+                                    <i data-lucide="code-2"></i> Full-Stack SWE
+                                </button>
+                                <button type="button" class="btn-sample" data-sample="ai-data-scientist">
+                                    <i data-lucide="brain"></i> AI & Data Scientist
+                                </button>
+                                <button type="button" class="btn-sample" data-sample="cloud-devops-engineer">
+                                    <i data-lucide="server"></i> DevOps / SRE
+                                </button>
+                            </div>
+                            <input type="hidden" name="sample_id" id="sampleIdInput" value="">
+                        </div>
+                    </div>
+
+                    <!-- Right: Target Job Description Area -->
+                    <div class="input-column">
+                        <div class="jd-header">
+                            <label class="input-label" for="jobDescriptionInput">
+                                <i data-lucide="briefcase"></i>
+                                <span>Target Job Description (Optional)</span>
+                            </label>
+                            <button type="button" class="btn-text-action" id="btnPasteSampleJD">
+                                <i data-lucide="copy"></i> Load Sample JD
+                            </button>
+                        </div>
+
+                        <div class="textarea-wrapper">
+                            <textarea 
+                                name="job_description" 
+                                id="jobDescriptionInput" 
+                                class="custom-textarea" 
+                                placeholder="Paste the job posting description here to calculate your Match % Score, discover missing keywords, and tailor your cover letter & interview prep..."
+                                rows="9"
+                            ></textarea>
+                        </div>
+                        <span class="input-hint">Tip: Adding a job description activates tailored keyword gap analysis and personalized STAR interview answers!</span>
+                    </div>
+                </div>
+
+                <!-- Submit Action Bar -->
+                <div class="submit-action-bar">
+                    <button type="submit" class="btn-primary-glow" id="btnSubmit">
+                        <span class="btn-text"><i data-lucide="sparkles"></i> Analyze Resume & Generate Strategy</span>
+                        <div class="spinner hidden" id="submitSpinner"></div>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+<!-- Key Features Section -->
+<section class="features-section" id="features">
+    <div class="container">
+        <div class="section-header text-center">
+            <span class="section-tag">Powerful Features</span>
+            <h2 class="section-title">Everything You Need to Win Interviews</h2>
+            <p class="section-subtitle">Designed for software engineers, product leaders, data scientists, and ambitious professionals.</p>
+        </div>
+
+        <div class="features-grid">
+            <div class="feature-card glass-panel">
+                <div class="feature-icon icon-emerald">
+                    <i data-lucide="gauge"></i>
+                </div>
+                <h3 class="feature-title">Multi-Pillar ATS Scoring</h3>
+                <p class="feature-desc">Analyzes formatting, section completeness, quantifiable metrics ratio, active verbs, and keyword density.</p>
+            </div>
+
+            <div class="feature-card glass-panel">
+                <div class="feature-icon icon-teal">
+                    <i data-lucide="target"></i>
+                </div>
+                <h3 class="feature-title">Job Description Gap Matcher</h3>
+                <p class="feature-desc">Detects missing hard and soft skills required by your dream job and provides a match percentage score.</p>
+            </div>
+
+            <div class="feature-card glass-panel">
+                <div class="feature-icon icon-indigo">
+                    <i data-lucide="mail-check"></i>
+                </div>
+                <h3 class="feature-title">Tailored Cover Letter AI</h3>
+                <p class="feature-desc">Instantly crafts high-converting, personalized cover letters highlighting your top quantified achievements.</p>
+            </div>
+
+            <div class="feature-card glass-panel">
+                <div class="feature-icon icon-amber">
+                    <i data-lucide="message-square-code"></i>
+                </div>
+                <h3 class="feature-title">STAR Interview Prep</h3>
+                <p class="feature-desc">Generates role-specific behavioral and technical questions with complete Situation-Task-Action-Result answers.</p>
+            </div>
+
+            <div class="feature-card glass-panel">
+                <div class="feature-icon icon-rose">
+                    <i data-lucide="send"></i>
+                </div>
+                <h3 class="feature-title">Cold Outreach Drafter</h3>
+                <p class="feature-desc">Generates 300-char LinkedIn connection notes, recruiter InMails, and executive cold emails that get replies.</p>
+            </div>
+
+            <div class="feature-card glass-panel">
+                <div class="feature-icon icon-cyan">
+                    <i data-lucide="trending-up"></i>
+                </div>
+                <h3 class="feature-title">3-Phase Skill Roadmap</h3>
+                <p class="feature-desc">Identifies your skill gaps and provides a structured week-by-week upskilling roadmap with project ideas.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works Section -->
+<section class="workflow-section">
+    <div class="container">
+        <div class="section-header text-center">
+            <span class="section-tag">Simple Workflow</span>
+            <h2 class="section-title">How ResumeAI Works</h2>
+        </div>
+
+        <div class="workflow-steps">
+            <div class="step-card">
+                <div class="step-number">01</div>
+                <h4 class="step-title">Upload Resume & Target Job</h4>
+                <p class="step-desc">Drop your PDF/DOCX resume and paste the job description you want to target.</p>
+            </div>
+
+            <div class="step-arrow"><i data-lucide="chevron-right"></i></div>
+
+            <div class="step-card">
+                <div class="step-number">02</div>
+                <h4 class="step-title">Deep NLP & ATS Analysis</h4>
+                <p class="step-desc">Our engine parses sections, skills, metrics, and matches keywords in milliseconds.</p>
+            </div>
+
+            <div class="step-arrow"><i data-lucide="chevron-right"></i></div>
+
+            <div class="step-card">
+                <div class="step-number">03</div>
+                <h4 class="step-title">Optimize & Land Interviews</h4>
+                <p class="step-desc">Export rewritten bullet points, custom cover letters, STAR prep, and reach out to hiring managers.</p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

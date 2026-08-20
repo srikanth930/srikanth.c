@@ -1,0 +1,38 @@
+Alex Chen
+San Francisco, CA | alex.chen@email.com | +1 (415) 555-0192 | linkedin.com/in/alexchen-dev | github.com/alexchen-dev
+
+PROFESSIONAL SUMMARY
+Senior Full-Stack Software Engineer with 6+ years of experience architecting distributed cloud applications, high-throughput microservices, and modern web applications. Expert in Python, FastAPI, React, PostgreSQL, Docker, and AWS. Proven track record of improving system latency by 45% and leading cross-functional teams to scale platforms to 500,000+ active users.
+
+CORE COMPETENCIES & TECHNICAL SKILLS
+• Programming Languages: Python, JavaScript, TypeScript, SQL, Go, HTML5, CSS3, Bash
+• Frameworks & Libraries: FastAPI, Django, Flask, React, Next.js, Node.js, Redux, Tailwind CSS, PyTest
+• Cloud & DevOps: AWS (Lambda, ECS, S3, RDS, CloudWatch), Docker, Kubernetes, Terraform, CI/CD, GitHub Actions, Linux, Nginx
+• Databases & Caching: PostgreSQL, Redis, MongoDB, Elasticsearch, Supabase
+• Architecture & Practices: Microservices, System Design, RESTful APIs, GraphQL, Test-Driven Development (TDD), Agile/Scrum
+• Soft Skills: Engineering Leadership, Mentorship, Cross-functional Collaboration, Problem Solving
+
+WORK EXPERIENCE
+
+Lead Software Engineer | Apex Cloud Systems | San Francisco, CA
+March 2022 – Present
+• Architected and deployed scalable RESTful and GraphQL microservices using FastAPI and PostgreSQL, serving 500,000+ daily active users with 99.99% uptime.
+• Optimized distributed database query performance and implemented Redis caching, reducing API response latency by 48% (P95 from 220ms to 114ms).
+• Spearheaded migration of legacy monolithic architecture into containerized Docker/Kubernetes microservices on AWS ECS, slashing server infrastructure costs by $120,000 annually.
+• Mentored a team of 6 software engineers through weekly code reviews, technical design workshops, and pair programming sessions.
+• Automated end-to-end CI/CD delivery pipelines using GitHub Actions, decreasing deployment cycle time by 65%.
+
+Senior Software Engineer | ByteFlow Technologies | Austin, TX
+July 2019 – February 2022
+• Developed high-performance real-time data streaming pipelines with Python, Kafka, and Redis to process 2.5 million financial transactions per day.
+• Engineered responsive frontend dashboards in React, TypeScript, and Tailwind CSS, increasing user engagement by 32%.
+• Implemented automated unit and integration test suites using PyTest and Jest, boosting test coverage from 55% to 88%.
+• Collaborated closely with Product Management and UX teams in bi-weekly Agile sprints to deliver 14 major feature releases ahead of schedule.
+
+EDUCATION
+Bachelor of Science in Computer Science
+University of California, Berkeley | Graduated 2019
+
+CERTIFICATIONS & AWARDS
+• AWS Certified Solutions Architect – Associate (2023)
+• Certified Kubernetes Application Developer (CKAD) (2022)
