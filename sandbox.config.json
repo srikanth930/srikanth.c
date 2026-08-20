@@ -1,0 +1,7 @@
+{
+  "template": "python",
+  "view": "browser",
+  "container": {
+    "port": 8000
+  }
+}

@@ -69,6 +69,10 @@
 
 ```text
 CODE X/
+├── .codesandbox/              # CodeSandbox devbox & browser preview configuration
+│   └── tasks.json
+├── .devcontainer/             # GitHub Codespaces automatic environment configuration
+│   └── devcontainer.json
 ├── app/
 │   ├── config.py              # Application settings & environment config
 │   ├── main.py                # FastAPI routes & web endpoints
@@ -80,20 +84,23 @@ CODE X/
 │   │   ├── scorer.py          # 5-pillar ATS scoring calculation engine
 │   │   └── skills_database.py # 1,000+ categorized skills taxonomies
 │   ├── static/
-│   │   ├── css/style.css      # Glassmorphism styling & themes
+│   │   ├── css/style.css      # Glassmorphism styling, 1-page report & print layout
 │   │   └── js/
-│   │       ├── app.js         # UI interactions, drag & drop, tab switching
+│   │       ├── app.js         # UI interactions, 1-page modal, drag & drop, tab switching
 │   │       └── charts.js      # Chart.js ATS gauge & radar charts
 │   └── templates/
 │       ├── base.html          # Base layout template with header & footer
 │       ├── index.html         # Main upload landing page
-│       └── results.html       # Analytics dashboard & AI suite page
+│       └── results.html       # Analytics dashboard, 1-page report & AI suite
 ├── sample_resumes/            # Sample resumes for 1-click testing
 │   ├── ai-data-scientist.txt
 │   ├── cloud-devops-engineer.txt
 │   └── senior-software-engineer.txt
+├── Dockerfile                 # Container image for Docker & cloud deployment
+├── Procfile                   # Cloud process runner for Render/Heroku
+├── sandbox.config.json        # CodeSandbox container template configuration
 ├── requirements.txt           # Project dependencies
-├── run.py                     # Application runner script
+├── run.py                     # Application runner script (0.0.0.0 host binding)
 └── test_app.py                # Automated test suite
 ```
 
@@ -101,22 +108,31 @@ CODE X/
 
 ## 🚀 Quick Start
 
-### 1. Install Dependencies
-```bash
-pip install -r requirements.txt
-```
+### Option A: Local Setup
 
-### 2. Run the Web Application
-```bash
-python run.py
-```
+1. **Install Dependencies:**
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-Open your browser and navigate to:
-```text
-http://127.0.0.1:8000
-```
+2. **Run the Web Application:**
+   ```bash
+   python run.py
+   ```
 
-### 3. Run Automated Tests
+3. **Open in Browser:**
+   ```text
+   http://127.0.0.1:8000
+   ```
+
+### Option B: 1-Click Cloud Preview (CodeSandbox & GitHub Codespaces)
+
+- **CodeSandbox**: Open the repository in [CodeSandbox](https://codesandbox.io). CodeSandbox automatically reads `.codesandbox/tasks.json` and boots up the interactive browser preview on port 8000.
+- **GitHub Codespaces**: On GitHub, click **Code** → **Codespaces** → **Create codespace on main**. Dependencies and port forwarding will launch automatically.
+
+---
+
+### Run Automated Tests
 ```bash
 python test_app.py
 ```
