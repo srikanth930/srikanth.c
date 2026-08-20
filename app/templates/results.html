@@ -32,10 +32,10 @@
                 </div>
             </div>
         </div>
-
         <div class="header-actions">
             <a href="/" class="btn-secondary"><i data-lucide="arrow-left"></i> Analyze Another</a>
-            <button type="button" class="btn-secondary" id="btnPrintReport"><i data-lucide="printer"></i> Print / Save PDF</button>
+            <button type="button" class="btn-primary" id="btnOpenOnePageReport"><i data-lucide="file-check"></i> 1-Page Executive Report</button>
+            <button type="button" class="btn-secondary" id="btnPrintReport"><i data-lucide="printer"></i> Print Full / PDF</button>
         </div>
     </div>
 
@@ -475,6 +475,210 @@
             </div>
         </div>
 
+    </div>
+
+    <!-- 1-Page Executive Report Modal -->
+    <div class="modal-overlay hidden" id="onePageReportModal">
+        <div class="modal-container modal-xl">
+            <div class="modal-header">
+                <div class="modal-title-group">
+                    <i data-lucide="file-check" class="text-accent"></i>
+                    <div>
+                        <h3 class="modal-title">1-Page Executive ATS Report</h3>
+                        <p class="modal-subtitle">Compact, single-page printable executive summary & scoring scorecard</p>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-primary btn-sm" id="btnPrintOnePageSheet">
+                        <i data-lucide="printer"></i> Print / Save 1-Page PDF
+                    </button>
+                    <button type="button" class="btn-secondary btn-sm" id="btnCopyOnePageSummary">
+                        <i data-lucide="copy"></i> Copy Summary
+                    </button>
+                    <button type="button" class="modal-close-btn" id="btnCloseOnePageModal" title="Close Modal">
+                        <i data-lucide="x"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="modal-body">
+                <!-- Single-Page Printable Executive Sheet -->
+                <div class="one-page-report-sheet" id="onePageSheet">
+                    
+                    <!-- Sheet Header -->
+                    <div class="opr-header">
+                        <div class="opr-candidate-meta">
+                            <div class="opr-name-row">
+                                <h2 class="opr-name">{{ profile.contact.name }}</h2>
+                                <span class="opr-target-role">Target: {% if jd_match.has_jd %}Target Position{% else %}Software Professional{% endif %}</span>
+                            </div>
+                            <div class="opr-contacts-list">
+                                {% if profile.contact.email %}
+                                <span><i data-lucide="mail"></i> {{ profile.contact.email }}</span>
+                                {% endif %}
+                                {% if profile.contact.phone %}
+                                <span><i data-lucide="phone"></i> {{ profile.contact.phone }}</span>
+                                {% endif %}
+                                {% if profile.contact.linkedin %}
+                                <span><i data-lucide="linkedin"></i> {{ profile.contact.linkedin }}</span>
+                                {% endif %}
+                                {% if profile.contact.github %}
+                                <span><i data-lucide="github"></i> {{ profile.contact.github }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="opr-doc-badge">
+                            <div class="opr-score-box">
+                                <span class="opr-score-num">{{ ats_score.overall_score }}</span>
+                                <span class="opr-score-denom">/100</span>
+                            </div>
+                            <span class="opr-badge-pill badge-{{ ats_score.rating_color }}">{{ ats_score.rating_badge }}</span>
+                        </div>
+                    </div>
+
+                    <!-- 4-Stat Metrics Row -->
+                    <div class="opr-metrics-grid">
+                        <div class="opr-metric-card">
+                            <span class="opr-m-label">ATS Score</span>
+                            <span class="opr-m-val text-accent">{{ ats_score.overall_score }}<small>/100</small></span>
+                            <span class="opr-m-sub">{{ ats_score.rating_badge }}</span>
+                        </div>
+                        <div class="opr-metric-card">
+                            <span class="opr-m-label">Job Match Fit</span>
+                            <span class="opr-m-val {% if jd_match.has_jd %}{% if jd_match.match_percentage >= 75 %}text-emerald{% else %}text-amber{% endif %}{% else %}text-teal{% endif %}">
+                                {% if jd_match.has_jd %}{{ jd_match.match_percentage }}%{% else %}{{ profile.skills.total_skills_count }}{% endif %}
+                            </span>
+                            <span class="opr-m-sub">{% if jd_match.has_jd %}{{ jd_match.fit_level }}{% else %}Total Skills{% endif %}</span>
+                        </div>
+                        <div class="opr-metric-card">
+                            <span class="opr-m-label">Impact Metrics</span>
+                            <span class="opr-m-val text-indigo">{{ profile.metrics.quantified_count }}</span>
+                            <span class="opr-m-sub">Quantified Bullets</span>
+                        </div>
+                        <div class="opr-metric-card">
+                            <span class="opr-m-label">Word Count</span>
+                            <span class="opr-m-val text-muted">{{ doc_data.word_count }}</span>
+                            <span class="opr-m-sub">{{ doc_data.file_type }} Document</span>
+                        </div>
+                    </div>
+
+                    <!-- 2-Column Analytical Core -->
+                    <div class="opr-columns">
+                        
+                        <!-- Left Column: 5-Pillars & Strengths -->
+                        <div class="opr-col">
+                            <div class="opr-section-card">
+                                <h4 class="opr-section-title"><i data-lucide="bar-chart-2"></i> 5-Pillar ATS Breakdown</h4>
+                                <div class="opr-pillar-list">
+                                    {% for key, pillar in ats_score.breakdown.items() %}
+                                    <div class="opr-pillar-row">
+                                        <div class="opr-pillar-meta">
+                                            <span class="opr-pillar-name">{{ pillar.label }}</span>
+                                            <span class="opr-pillar-score">{{ pillar.score }} / {{ pillar.max }}</span>
+                                        </div>
+                                        <div class="opr-progress-track">
+                                            <div class="opr-progress-fill {% if pillar.percentage >= 80 %}fill-emerald{% elif pillar.percentage >= 50 %}fill-teal{% else %}fill-rose{% endif %}" style="width: {{ pillar.percentage }}%;"></div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+
+                            <div class="opr-section-card">
+                                <h4 class="opr-section-title"><i data-lucide="check-check" class="text-emerald"></i> Key Strengths</h4>
+                                <ul class="opr-strengths-list">
+                                    {% for st in ats_score.strengths[:3] %}
+                                    <li><i data-lucide="check" class="text-emerald"></i> <span>{{ st }}</span></li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Right Column: Keywords & Action Items -->
+                        <div class="opr-col">
+                            {% if jd_match.has_jd %}
+                            <div class="opr-section-card">
+                                <h4 class="opr-section-title"><i data-lucide="target" class="text-accent"></i> Keywords & Gap Analysis</h4>
+                                {% if jd_match.missing_skills %}
+                                <div class="opr-tag-group">
+                                    <span class="opr-tag-label text-rose"><i data-lucide="alert-circle"></i> Missing Critical Keywords:</span>
+                                    <div class="opr-tags-wrap">
+                                        {% for sk in jd_match.missing_skills[:6] %}
+                                        <span class="tag-pill tag-missing tag-sm">{{ sk }}</span>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                {% endif %}
+                                {% if jd_match.matched_skills %}
+                                <div class="opr-tag-group" style="margin-top: 6px;">
+                                    <span class="opr-tag-label text-emerald"><i data-lucide="check-circle-2"></i> Matched Keywords:</span>
+                                    <div class="opr-tags-wrap">
+                                        {% for sk in jd_match.matched_skills[:8] %}
+                                        <span class="tag-pill tag-matched tag-sm">{{ sk }}</span>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% else %}
+                            <div class="opr-section-card">
+                                <h4 class="opr-section-title"><i data-lucide="cpu" class="text-accent"></i> Domain Skill Distribution</h4>
+                                <div class="opr-skills-domain-grid">
+                                    {% for category, skills in profile.skills.categorized.items() %}
+                                    {% if skills %}
+                                    <div class="opr-domain-item">
+                                        <strong class="opr-domain-title">{{ category }} ({{ skills | length }}):</strong>
+                                        <span class="opr-domain-skills">{{ skills[:4] | join(', ') }}{% if skills | length > 4 %}, +{{ skills | length - 4 }} more{% endif %}</span>
+                                    </div>
+                                    {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            <div class="opr-section-card">
+                                <h4 class="opr-section-title"><i data-lucide="sparkles" class="text-amber"></i> Recommended Improvements</h4>
+                                <ul class="opr-suggestions-list">
+                                    {% for sg in ats_score.suggestions[:3] %}
+                                    <li>
+                                        <span class="badge-severity badge-severity-{{ sg.type }}">{{ sg.type | upper }}</span>
+                                        <span><strong>{{ sg.category }}:</strong> {{ sg.text }}</span>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Bottom Executive Verdict & Summary -->
+                    <div class="opr-bottom-row">
+                        <div class="opr-verdict-card">
+                            <div class="opr-verdict-header">
+                                <i data-lucide="award" class="text-accent"></i>
+                                <strong>Executive ATS Verdict:</strong>
+                            </div>
+                            <p class="opr-verdict-text">
+                                {% if ats_score.overall_score >= 80 %}
+                                Candidate demonstrates strong industry alignment, rich quantifiable impact, and excellent keyword depth. Recommended for recruiter screening and technical interview scheduling.
+                                {% elif ats_score.overall_score >= 60 %}
+                                Candidate possesses strong foundational experience. Integrating missing job description keywords and rewriting bullet points with specific metrics will maximize ATS pass rates.
+                                {% else %}
+                                Resume requires formatting updates, contact section verification, and quantifiable metric additions to pass automated Applicant Tracking Systems reliably.
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Sheet Footer -->
+                    <div class="opr-footer">
+                        <span>AI Resume Analyser & Job Assistant • 1-Page Executive Assessment</span>
+                        <span>Evaluation ID: {{ filename | replace(" ", "_") }} • Source: {{ filename }}</span>
+                    </div>
+
+                </div>
+            </div>
+        </div>
     </div>
 
 </div>
